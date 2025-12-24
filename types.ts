@@ -13,3 +13,5 @@ export enum GreetingState {
   ANIMATING = 'ANIMATING',
   SHOW_BUBBLE = 'SHOW_BUBBLE'
 }
+
+export {};
