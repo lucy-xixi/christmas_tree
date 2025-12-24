@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>3D 魔法圣诞树</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes snowfall {
+      0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+    }
+    .snow {
+      position: fixed;
+      top: -10px;
+      background: white;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 50;
+      filter: blur(1px);
+    }
+    .tree-glow {
+      filter: drop-shadow(0 0 30px rgba(34, 197, 94, 0.4)) drop-shadow(0 0 10px rgba(234, 179, 8, 0.3));
+    }
+    body {
+      background-color: #020617;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+    }
+    .perspective-container {
+      perspective: 1200px;
+    }
+    .tree-3d {
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+    }
+    .bg-radial-gradient {
+      background: radial-gradient(circle at center, var(--tw-gradient-from), var(--tw-gradient-to));
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "vite": "https://esm.sh/vite@^7.3.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+  <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

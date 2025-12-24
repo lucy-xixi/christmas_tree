@@ -1,0 +1,10 @@
+
+{
+  "name": "Magic Christmas Tree 3D",
+  "description": "An interactive, 3D-effect Christmas tree app. Decorate your tree with AI-powered enhancements and interact using gestures and motion sensors.",
+  "requestFramePermissions": [
+    "camera",
+    "accelerometer",
+    "gyroscope"
+  ]
+}
