@@ -1,68 +1,50 @@
 
 import { GoogleGenAI } from "@google/genai";
 
-// Fix: Always use new GoogleGenAI({ apiKey: process.env.API_KEY }) as per guidelines
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// 预设的高质量圣诞背景图（作为 Fallback）
+const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1543589077-47d81606c1ad?q=80&w=1080&auto=format&fit=crop";
 
-export const generateSantaImage = async (): Promise<string | null> => {
+export async function generateChristmasScene(): Promise<string> {
+  const apiKey = process.env.API_KEY;
+
+  // 如果没有 API Key，直接返回预设图片，避免调用失败
+  if (!apiKey || apiKey === "undefined" || apiKey.length < 5) {
+    console.warn("API_KEY not found or invalid. Using fallback image.");
+    return FALLBACK_IMAGE;
+  }
+
   try {
+    const ai = new GoogleGenAI({ apiKey });
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
         parts: [
           {
-            text: 'A cute and playful cartoon illustration of a smiling Santa Claus in the center, wearing a classic red Christmas outfit with a white-trimmed hat. The style is bright and warm with a cinematic feel. High resolution, high quality digital art, clean lines.',
+            text: `A high-quality, vertical 9:16 Christmas scene. 
+            Background: A large, cozy, beautifully lit suburban house with warm glowing golden windows, 
+            detailed architectural features (gables, porch), and colorful string lights outlining the roof. 
+            Foreground: A realistic, tall, magnificent Christmas tree decorated with twinkling golden lights, 
+            colorful ornaments, and silver tinsel. Many wrapped gifts under the tree. 
+            Environment: Gently falling snow, soft moonlit winter night sky. 
+            Atmosphere: Warm, cheerful, cozy holiday feel, vivid colors, 8k resolution.`,
           },
         ],
       },
       config: {
         imageConfig: {
-          aspectRatio: "1:1",
+          aspectRatio: "9:16"
         }
       }
     });
 
-    // Fix: Access response.candidates[0].content.parts to find the image part
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
+    for (const part of response.candidates[0].content.parts) {
       if (part.inlineData) {
         return `data:image/png;base64,${part.inlineData.data}`;
       }
     }
-    return null;
+    return FALLBACK_IMAGE;
   } catch (error) {
-    console.error("Santa Generation Error:", error);
-    return null;
+    console.error("Error generating Christmas scene:", error);
+    return FALLBACK_IMAGE;
   }
-};
-
-export const editTreeWithAI = async (base64Image: string, prompt: string): Promise<string | null> => {
-  try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-image',
-      contents: {
-        parts: [
-          {
-            inlineData: {
-              data: base64Image.split(',')[1],
-              mimeType: 'image/png',
-            },
-          },
-          {
-            text: `This is a Christmas scene. Please edit this image: ${prompt}.`,
-          },
-        ],
-      },
-    });
-
-    // Fix: Access response.candidates[0].content.parts to find the image part
-    for (const part of response.candidates?.[0]?.content?.parts || []) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
-      }
-    }
-    return null;
-  } catch (error) {
-    console.error("Gemini Error:", error);
-    throw error;
-  }
-};
+}
