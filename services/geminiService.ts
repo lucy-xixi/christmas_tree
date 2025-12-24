@@ -1,21 +1,20 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 
-// 预设的高质量圣诞背景图（作为 Fallback）
+// Fallback high-quality Christmas background image
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1543589077-47d81606c1ad?q=80&w=1080&auto=format&fit=crop";
 
+/**
+ * Generates a Christmas scene using Gemini API.
+ * Uses gemini-2.5-flash-image for general image generation tasks.
+ */
 export async function generateChristmasScene(): Promise<string> {
-  const apiKey = process.env.API_KEY;
-
-  // 如果没有 API Key，直接返回预设图片，避免调用失败
-  if (!apiKey || apiKey === "undefined" || apiKey.length < 5) {
-    console.warn("API_KEY not found or invalid. Using fallback image.");
-    return FALLBACK_IMAGE;
-  }
-
   try {
-    const ai = new GoogleGenAI({ apiKey });
-    const response = await ai.models.generateContent({
+    // Always use process.env.API_KEY directly when initializing the GoogleGenAI client.
+    // We assume the key is pre-configured and accessible.
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    
+    const response: GenerateContentResponse = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
       contents: {
         parts: [
@@ -37,11 +36,19 @@ export async function generateChristmasScene(): Promise<string> {
       }
     });
 
-    for (const part of response.candidates[0].content.parts) {
-      if (part.inlineData) {
-        return `data:image/png;base64,${part.inlineData.data}`;
+    // Safely iterate through candidates and parts to find the image part as per Gemini SDK guidelines.
+    if (response.candidates && response.candidates.length > 0) {
+      const parts = response.candidates[0].content.parts;
+      for (const part of parts) {
+        // Find the image part, do not assume it is the first part.
+        if (part.inlineData && part.inlineData.data) {
+          const base64EncodeString: string = part.inlineData.data;
+          const mimeType = part.inlineData.mimeType || 'image/png';
+          return `data:${mimeType};base64,${base64EncodeString}`;
+        }
       }
     }
+    
     return FALLBACK_IMAGE;
   } catch (error) {
     console.error("Error generating Christmas scene:", error);
