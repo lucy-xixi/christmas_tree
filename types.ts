@@ -14,5 +14,11 @@ export enum GreetingState {
   SHOW_BUBBLE = 'SHOW_BUBBLE'
 }
 
-// Fix: Removed redundant and conflicting ambient declarations for framer-motion, lucide-react, and process global.
-// These are already defined by the environment or library types, causing "subsequent variable declaration" errors.
+// Removed redundant ambient declarations for modules 'framer-motion' and 'lucide-react'
+// because they are already defined in the environment. Redeclaring them with 'any'
+// leads to "Subsequent variable declarations must have the same type" errors.
+
+// Removed the global 'process' declaration as it conflicts with the built-in 'Process' type.
+// The execution context already provides a properly typed 'process' global.
+
+export {};

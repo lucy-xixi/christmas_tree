@@ -3,8 +3,8 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, useAnimation, AnimatePresence } from 'framer-motion';
 import { Share2, CheckCircle2 } from 'lucide-react';
 import { generateChristmasScene } from './services/geminiService';
-import Snowfall from './components/Snowfall.tsx';
-import SpeechBubble from './components/SpeechBubble.tsx';
+import Snowfall from './components/Snowfall';
+import SpeechBubble from './components/SpeechBubble';
 import { GreetingState } from './types';
 
 const App: React.FC = () => {

@@ -10,8 +10,8 @@ const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1543589077-47d81606c1a
  */
 export async function generateChristmasScene(): Promise<string> {
   try {
-    // Fix: Always use process.env.API_KEY directly when initializing the GoogleGenAI client.
-    // Assuming API_KEY is pre-configured and accessible as per requirements.
+    // Always use process.env.API_KEY directly when initializing the GoogleGenAI client.
+    // Assuming API_KEY is pre-configured and accessible.
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
     const response: GenerateContentResponse = await ai.models.generateContent({
@@ -42,7 +42,7 @@ export async function generateChristmasScene(): Promise<string> {
       const parts = candidates[0].content?.parts;
       if (parts) {
         for (const part of parts) {
-          // Fix: Iterate through all parts to find the image part; do not assume the first part is an image.
+          // Iterate through all parts to find the image part; do not assume the first part is an image.
           if (part.inlineData && part.inlineData.data) {
             const base64EncodeString: string = part.inlineData.data;
             const mimeType = part.inlineData.mimeType || 'image/png';
