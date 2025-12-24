@@ -3,8 +3,8 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, useAnimation, AnimatePresence } from 'framer-motion';
 import { Share2, CheckCircle2 } from 'lucide-react';
 import { generateChristmasScene } from './services/geminiService';
-import Snowfall from './components/Snowfall';
-import SpeechBubble from './components/SpeechBubble';
+import Snowfall from './components/Snowfall.tsx';
+import SpeechBubble from './components/SpeechBubble.tsx';
 import { GreetingState } from './types';
 
 const App: React.FC = () => {
@@ -16,8 +16,7 @@ const App: React.FC = () => {
   const treeControls = useAnimation();
   const giftControls = useAnimation();
 
-  // 从 URL 中动态获取收件人姓名
-  // 例如: url.com?to=小明 -> 姓名就是 小明
+  // Dynamically get recipient name from URL
   const recipientName = useMemo(() => {
     if (typeof window === 'undefined') return "Chuan";
     const params = new URLSearchParams(window.location.search);
@@ -25,12 +24,16 @@ const App: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
     async function loadScene() {
       const img = await generateChristmasScene();
-      setBackgroundImage(img);
-      setLoading(false);
+      if (isMounted) {
+        setBackgroundImage(img);
+        setLoading(false);
+      }
     }
     loadScene();
+    return () => { isMounted = false; };
   }, []);
 
   const handleTreeClick = useCallback(async () => {
@@ -38,31 +41,31 @@ const App: React.FC = () => {
 
     setState(GreetingState.ANIMATING);
 
-    // Sequence of animations
+    // Sequence of animations for tree and gifts
     await Promise.all([
       treeControls.start({
-        rotate: [0, -1.8, 1.8, -1.8, 1.8, 0],
-        scale: [1, 1.04, 1],
+        rotate: [0, -2, 2, -2, 2, 0],
+        scale: [1, 1.05, 1],
         transition: { duration: 0.8, ease: "easeInOut" }
       }),
       giftControls.start({
-        y: [0, -25, 0],
-        transition: { duration: 0.5, ease: "easeOut" }
+        y: [0, -30, 0],
+        transition: { duration: 0.6, ease: "easeOut" }
       })
     ]);
 
     setState(GreetingState.SHOW_BUBBLE);
 
-    // Reset bubble after some time
+    // Auto-hide bubble after duration
     setTimeout(() => {
       setState(GreetingState.IDLE);
-    }, 7000);
+    }, 8000);
   }, [state, treeControls, giftControls]);
 
   const handleShare = async () => {
     const shareData = {
-      title: '圣诞快乐！',
-      text: `这是我送给你的圣诞惊喜，快来看看吧！`,
+      title: 'Christmas Wishes!',
+      text: `Merry Christmas! I made this interactive card for you, check it out!`,
       url: window.location.href,
     };
 
@@ -78,7 +81,7 @@ const App: React.FC = () => {
         setShowCopyTooltip(true);
         setTimeout(() => setShowCopyTooltip(false), 3000);
       } catch (err) {
-        alert('请手动复制浏览器地址栏发送。');
+        alert('Please copy the URL manually from the address bar.');
       }
     }
   };
@@ -91,7 +94,7 @@ const App: React.FC = () => {
           transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
           className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full mb-6"
         />
-        <p className="font-holiday text-2xl animate-pulse">正在为你生成专属圣诞场景...</p>
+        <p className="font-holiday text-2xl animate-pulse">Generating your festive world...</p>
       </div>
     );
   }
@@ -110,12 +113,13 @@ const App: React.FC = () => {
         
         <Snowfall />
 
-        {/* Share Button */}
+        {/* Action Buttons */}
         <div className="absolute top-8 left-8 z-50">
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={handleShare}
             className="p-3 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-yellow-100 shadow-xl"
+            aria-label="Share Greeting"
           >
             <Share2 size={24} />
           </motion.button>
@@ -129,13 +133,13 @@ const App: React.FC = () => {
                 className="absolute left-14 top-2 flex items-center gap-2 bg-green-600 text-white text-xs px-4 py-2 rounded-full whitespace-nowrap shadow-2xl border border-green-400"
               >
                 <CheckCircle2 size={14} />
-                链接已复制，粘贴给好友吧！
+                Link copied to clipboard!
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* Title */}
+        {/* Top Header */}
         <div className="absolute top-10 right-8 z-30 pointer-events-none text-right">
           <motion.h1 
             initial={{ opacity: 0, y: -10 }}
@@ -144,25 +148,24 @@ const App: React.FC = () => {
           >
             Merry Christmas
           </motion.h1>
-          <p className="text-white/40 text-[10px] tracking-widest mt-1">2025 HOLIDAY EDITION</p>
+          <p className="text-white/40 text-[10px] tracking-widest mt-1">2025 HOLIDAY SPECIAL</p>
         </div>
 
-        {/* Interactive Layer */}
-        <motion.div 
+        {/* Tree Interactive Layer */}
+        <div 
           className="absolute inset-0 z-40 flex items-center justify-center cursor-pointer"
           onClick={handleTreeClick}
         >
-          <motion.div animate={treeControls} className="absolute inset-0 pointer-events-none" />
-        </motion.div>
-
-        <motion.div animate={giftControls} className="absolute bottom-20 left-0 right-0 h-40 pointer-events-none z-30" />
+          {/* Invisible overlay that captures clicks for the "Tree" area */}
+          <div className="w-1/2 h-2/3 mt-32 bg-transparent" />
+        </div>
 
         <SpeechBubble 
           isVisible={state === GreetingState.SHOW_BUBBLE} 
           name={recipientName} 
         />
 
-        {/* Dynamic Light FX */}
+        {/* Static Visual Enhancements */}
         <div className="absolute inset-0 pointer-events-none z-20">
           <motion.div
             animate={{ opacity: [0.1, 0.4, 0.1] }}
@@ -171,15 +174,15 @@ const App: React.FC = () => {
           />
         </div>
 
-        {/* Tap Hint */}
+        {/* Tap Interaction Hint */}
         {state === GreetingState.IDLE && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: [0, 1, 0] }}
             transition={{ duration: 3, repeat: Infinity }}
-            className="absolute bottom-16 left-1/2 -translate-x-1/2 z-50 text-white/80 text-xs font-holiday uppercase tracking-[0.3em] pointer-events-none drop-shadow-lg"
+            className="absolute bottom-16 left-1/2 -translate-x-1/2 z-50 text-white/80 text-xs font-holiday uppercase tracking-[0.3em] pointer-events-none drop-shadow-lg text-center whitespace-nowrap"
           >
-            点击圣诞树 开启魔力
+            Tap the Tree for Magic
           </motion.div>
         )}
       </div>

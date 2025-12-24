@@ -10,8 +10,8 @@ const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1543589077-47d81606c1a
  */
 export async function generateChristmasScene(): Promise<string> {
   try {
-    // Always use process.env.API_KEY directly when initializing the GoogleGenAI client.
-    // We assume the key is pre-configured and accessible.
+    // Fix: Always use process.env.API_KEY directly when initializing the GoogleGenAI client.
+    // Assuming API_KEY is pre-configured and accessible as per requirements.
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
     
     const response: GenerateContentResponse = await ai.models.generateContent({
@@ -36,15 +36,18 @@ export async function generateChristmasScene(): Promise<string> {
       }
     });
 
-    // Safely iterate through candidates and parts to find the image part as per Gemini SDK guidelines.
-    if (response.candidates && response.candidates.length > 0) {
-      const parts = response.candidates[0].content.parts;
-      for (const part of parts) {
-        // Find the image part, do not assume it is the first part.
-        if (part.inlineData && part.inlineData.data) {
-          const base64EncodeString: string = part.inlineData.data;
-          const mimeType = part.inlineData.mimeType || 'image/png';
-          return `data:${mimeType};base64,${base64EncodeString}`;
+    // Safely iterate through candidates and parts with strict null checks
+    const candidates = response.candidates;
+    if (candidates && candidates.length > 0) {
+      const parts = candidates[0].content?.parts;
+      if (parts) {
+        for (const part of parts) {
+          // Fix: Iterate through all parts to find the image part; do not assume the first part is an image.
+          if (part.inlineData && part.inlineData.data) {
+            const base64EncodeString: string = part.inlineData.data;
+            const mimeType = part.inlineData.mimeType || 'image/png';
+            return `data:${mimeType};base64,${base64EncodeString}`;
+          }
         }
       }
     }
