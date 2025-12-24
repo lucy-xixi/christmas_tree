@@ -1,23 +1,15 @@
 
-export interface Ornament {
-  id: string;
-  type: 'ball' | 'star' | 'bell' | 'candy';
-  color: string;
-  x: number; // percentage 0-100
-  y: number; // percentage 0-100
+export interface Snowflake {
+  x: number;
+  y: number;
+  radius: number;
+  speed: number;
+  opacity: number;
+  wind: number;
 }
 
-export interface TreeState {
-  baseImage: string;
-  isCustomized: boolean;
-  ornaments: Ornament[];
-  isLit: boolean;
-  snowEnabled: boolean;
-}
-
-export enum AppStatus {
-  IDLE = 'idle',
-  EDITING = 'editing',
-  GENERATING = 'generating',
-  ERROR = 'error'
+export enum GreetingState {
+  IDLE = 'IDLE',
+  ANIMATING = 'ANIMATING',
+  SHOW_BUBBLE = 'SHOW_BUBBLE'
 }
